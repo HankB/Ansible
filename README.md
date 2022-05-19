@@ -1,3 +1,3 @@
 # Ansible
 
-various Ansible stuff
+Various Ansible stuff
