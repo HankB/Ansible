@@ -13,7 +13,7 @@
     debug: var=output.stdout_lines
 
   - name: build list of mounted partitions
-    shell: "ls {{sd_dev}}p?"
+    shell: "df 2>/dev/null|grep {{sd_dev}}|awk '{print $1}'"
     register: "partitions"
 
   - name: list mounted partitions
