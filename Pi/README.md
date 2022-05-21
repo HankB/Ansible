@@ -15,9 +15,29 @@ ansible -i inventory all -b -K -a "tail /var/log/messages"
 
 ## enable/disable overlayfs
 
+* `overlayfs-on.yaml`
+* `overlayfs-off.yaml`
+
 Still need some work on re-enabling R/O `/boot`.
 
 ```text
 ansible-playbook overlayfs-on.yaml -i inventory -b -K
 ansible-playbook overlayfs-off.yaml -i inventory -b -K
 ```
+
+## prepare a fresh SD card
+
+* provision-local.yml
+
+```text
+ansible-playbook provision-local.yml --extra-vars "sd_dev=/dev/mmcblk0"
+```
+
+* Copy the (previously downloaded) OS to the card.
+* Create the `/boot/wpa_supplicant.conf` file.
+* Create the `/boot/userconf.txt` file.
+* Create the `/boot/ssh` file.
+* Remove the file that permits passwordless `sudo`.
+* Change the host name.
+
+Status: Very much a work in progress.
