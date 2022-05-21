@@ -1,0 +1,30 @@
+---
+# Install and provision an SD card on localhost (before first boot.)
+- name: Provision SD card before initial boot
+  hosts: localhost
+  connection: local 
+  tasks:
+
+  - name: "just execute a ls -lrt command"
+    shell: "ls -lrt {{sd_dev}}p?" # wildcard pattern for e.g. {{/dev/mmcblk0}}p0 
+    register: "output"
+
+  - name: list partitions
+    debug: var=output.stdout_lines
+
+  - name: build list of mounted partitions
+    shell: "ls {{sd_dev}}p?"
+    register: "partitions"
+
+  - name: list mounted partitions
+    debug: var=partitions.stdout_lines
+
+  - name: unmount partitions
+    shell: "umount {{ item }}"
+    with_items: "{{ partitions.stdout_lines }}"
+
+#  - name: list unmounted partitions
+#    debug: var=unmounted.stdout_lines
+
+#  - name: Unmount a mounted volume
+#    command: umount /dev/mmcblk0p1
