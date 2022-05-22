@@ -5,12 +5,7 @@
   connection: local 
   tasks:
 
-  - name: "just execute a ls -lrt command"
-    shell: "ls -lrt {{sd_dev}}p?" # wildcard pattern for e.g. {{/dev/mmcblk0}}p0 
-    register: "output"
-
-  - name: list partitions
-    debug: var=output.stdout_lines
+# Prepare to and optionally copy new OS image
 
   - name: build list of mounted partitions
     shell: "df 2>/dev/null|grep {{sd_dev}}|awk '{print $1}'"
@@ -28,6 +23,8 @@
     become: yes
     shell: "xzcat {{os_image}} > {{sd_dev}}"
     when: os_image is defined
+
+# Mount and fiddle with stuff in eventual /boot partition
 
   - name: create boot partition mount point
     become: yes
