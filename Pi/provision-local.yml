@@ -26,6 +26,7 @@
   - name: copy OS image
     become: yes
     shell: "xzcat {{os_image}} > {{sd_dev}}"
+    when: need_to_write_OS is defined and need_to_write_OS == "yes"
 
 #  - name: list unmounted partitions
 #    debug: var=unmounted.stdout_lines

@@ -32,7 +32,8 @@ ansible-playbook overlayfs-off.yaml -i inventory -b -K
 ```text
 ansible-playbook provision-local.yml --extra-vars \
     "sd_dev=/dev/mmcblk0\
-    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
+    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz \
+    need_to_write_OS==yes"
 ```
 
 * Copy the (previously downloaded) OS to the card.
