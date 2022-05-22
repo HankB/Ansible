@@ -23,6 +23,10 @@
     shell: "umount {{ item }}"
     with_items: "{{ partitions.stdout_lines }}"
 
+  - name: copy OS image
+    become: yes
+    shell: "xzcat {{os_image}} > {{sd_dev}}"
+
 #  - name: list unmounted partitions
 #    debug: var=unmounted.stdout_lines
 
