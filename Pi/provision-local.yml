@@ -42,13 +42,19 @@
   - name: copy three files to boot partition
     become: yes
     copy:
-      src: /home/hbarta/.secrets/{{item}}
+      src: ~/.secrets/{{item}}
       dest: /mnt/boot/{{item}}
     with_items:
      - ssh
      - wpa_supplicant.conf
      - userconf.txt
   
+  - name: add button/off line to /boot/config.txt
+    become: yes
+    lineinfile:
+      path: /mnt/boot/config.txt
+      line: 'dtoverlay=gpio-shutdown,gpio_pin=7,active_low=1,gpio_pull=up'
+
   - name: unmount new boot partition
     become: yes
     shell: "umount {{sd_dev}}p1"
