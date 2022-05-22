@@ -58,17 +58,24 @@ hbarta@rocinante:~$
 ```text
 ansible-playbook provision-local.yml --extra-vars \
     "sd_dev=/dev/mmcblk0\
-    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
+    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz \
+    new_host_name=somehostname"
 ```
 
 Note: provide `os_image=...` only needed when the OS image is to be written.
 
 * Copy the (previously downloaded) OS to the card.
-* Create the `/boot/wpa_supplicant.conf` file.
-* Create the `/boot/userconf.txt` file.
-* Create the `/boot/ssh` file.
+* Copy the prepared `/boot/wpa_supplicant.conf` file.
+* Copy the prepared `/boot/userconf.txt` file.
+* Copy the prepared `/boot/ssh` file.
 * Add config for power on/off button (see <https://forums.raspberrypi.com/viewtopic.php?t=217442>)
-* Remove the file that permits passwordless `sudo`.
+* Disable (rename) the file that permits passwordless `sudo`.
 * Change the host name.
 
-Status: Very much a work in progress.
+Status: All points coded, need to test.
+
+### Errata
+
+* Uses arbitrary mountpoints `/mnt/boot` and `/mnt/rootfs` for manipulating files on the target SD card.
+* `new_host_name=...` is optional. If not provided, the host name will remain unchanged.
+* `os_image=...` is optional. If not provided, the image on the card will not be updated.
