@@ -56,8 +56,45 @@
     become: yes
     shell: "umount {{sd_dev}}p1"
 
-#  - name: list unmounted partitions
-#    debug: var=unmounted.stdout_lines
+# Mount and fiddle with eventual / partition
 
-#  - name: Unmount a mounted volume
-#    command: umount /dev/mmcblk0p1
+  - name: create rootfs partition mount point
+    become: yes
+    file:
+      path: /mnt/rootfs 
+      state: directory
+
+  - name: mount new rootfs partition
+    become: yes
+    shell: "mount {{sd_dev}}p2 /mnt/rootfs"
+
+  - name: update hostname in /etc/hostname
+    become: yes
+    lineinfile:
+      path: /mnt/rootfs/etc/hostname
+      regexp: raspberrypi
+      line: "{{new_host_name}}"
+    when: new_host_name is defined
+
+  - name: update hostname in /etc/hosts
+    become: yes
+    replace: 
+      path: /mnt/rootfs/etc/hosts
+      regexp: '(raspberrypi)'
+      replace: '\0{{new_host_name}}'
+      backup: yes
+    when: new_host_name is defined
+
+  - name: Check if passwordless sudo enabled
+    stat:
+      path: /mnt/rootfs/etc/sudoers.d/010_pi-nopasswd
+    register: passwordless_enabled
+
+  - name: prevent passwordless sudo
+    become: yes
+    shell: "mv /mnt/rootfs/etc/sudoers.d/010_pi-nopasswd /mnt/rootfs/etc/sudoers.d/010_pi-nopasswd~"
+    when: passwordless_enabled.stat.exists
+
+  - name: unmount new rootfs partition
+    become: yes
+    shell: "umount {{sd_dev}}p2"
