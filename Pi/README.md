@@ -1,6 +1,18 @@
 # playbooks for a Raspberry Pi
 
-Streamline initial setup and configuration to meet my tastes and usage.
+Streamline initial setup and configuration to meet my tastes and usage. These are worked out using the official releases of the Raspberry Pi OS. I don't use that on all of my Pis but I do have several Pi Zeroes that run the 32 bit Lite variant and share a lot of common configuration.
+
+Initial development of these scripts is on a laptop with SD card slot and where the card device and partitions are
+
+```text
+hbarta@rocinante:~$ ls -l /dev/mmcblk0*
+brw-rw---- 1 root disk 179, 0 May 21 17:16 /dev/mmcblk0
+brw-rw---- 1 root disk 179, 1 May 21 17:16 /dev/mmcblk0p1
+brw-rw---- 1 root disk 179, 2 May 21 17:16 /dev/mmcblk0p2
+hbarta@rocinante:~$
+```
+
+In particular note that partitions are identified using `p1`, `p2` and so on rather than `1`, `2` as used for SATA devices (e.g. `/dev/sda1`.)
 
 ## miscellaneous
 
@@ -27,7 +39,21 @@ ansible-playbook overlayfs-off.yaml -i inventory -b -K
 
 ## prepare a fresh SD card
 
-* provision-local.yml
+### Requirements
+
+* image file to write to card
+* three configuration files to be written to the `/boot` partition
+
+```text
+hbarta@rocinante:~$ ls -l ~/.secrets
+total 11
+-rw-r--r-- 1 hbarta hbarta   0 May 21 20:51 ssh
+-rw-r--r-- 1 hbarta hbarta 116 May 21 20:57 userconf.txt
+-rw-r--r-- 1 hbarta hbarta 224 May 21 20:58 wpa_supplicant.conf
+hbarta@rocinante:~$ 
+```
+
+* `provision-local.yml` usage
 
 ```text
 ansible-playbook provision-local.yml --extra-vars \
@@ -35,12 +61,13 @@ ansible-playbook provision-local.yml --extra-vars \
     os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
 ```
 
-Note: provide `os_image=...` only when the OS image is to be written.
+Note: provide `os_image=...` only needed when the OS image is to be written.
 
 * Copy the (previously downloaded) OS to the card.
 * Create the `/boot/wpa_supplicant.conf` file.
 * Create the `/boot/userconf.txt` file.
 * Create the `/boot/ssh` file.
+* Add config for power on/off button (see <https://forums.raspberrypi.com/viewtopic.php?t=217442>)
 * Remove the file that permits passwordless `sudo`.
 * Change the host name.
 
