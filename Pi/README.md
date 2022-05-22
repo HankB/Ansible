@@ -32,9 +32,10 @@ ansible-playbook overlayfs-off.yaml -i inventory -b -K
 ```text
 ansible-playbook provision-local.yml --extra-vars \
     "sd_dev=/dev/mmcblk0\
-    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz \
-    need_to_write_OS==yes"
+    os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
 ```
+
+Note: provide `os_image=...` only when the OS image is to be written.
 
 * Copy the (previously downloaded) OS to the card.
 * Create the `/boot/wpa_supplicant.conf` file.
