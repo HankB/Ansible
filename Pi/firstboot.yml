@@ -1,0 +1,16 @@
+---
+
+# commands to execute after the first boot for a Raspberry Pi
+
+# Install and provision an SD card on localhost (before first boot.)
+- name: Provision SD card before initial boot
+  become: yes
+  hosts: "{{host}}"
+  tasks:
+
+  - name: collect IP settings
+    shell: "ip addr"
+    register: ip_settings
+
+  - name: show IP settings
+    debug: var=ip_settings.stdout_lines
