@@ -7,3 +7,5 @@ rpi
 [local]
 localhost
 
+[iot]
+niwot
