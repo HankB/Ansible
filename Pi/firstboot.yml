@@ -27,6 +27,18 @@
   - name: show update/upgrade results
     debug: var=update_upgrade.stdout_lines
 
+  - name: install commonly used applications
+    become: yes
+    apt:
+      pkg:
+      - vim
+      - mosquitto-clients
+      - tree
+    register: SW_install
+
+  - name: show S/W install results
+    debug: var=SW_install.stdout_lines
+
   - name: set timezone
     become: yes
     command: "timedatectl set-timezone America/Chicago"
@@ -34,3 +46,6 @@
 
   - name: show set timezone results
     debug: var=set_timezone.stdout_lines
+
+  - name: reboot following updates
+    reboot:
