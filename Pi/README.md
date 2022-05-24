@@ -77,5 +77,7 @@ Status: All points coded, need to test.
 ### Errata
 
 * Uses arbitrary mountpoints `/mnt/boot` and `/mnt/rootfs` for manipulating files on the target SD card.
-* `new_host_name=...` is optional. If not provided, the host name will remain unchanged.
-* `os_image=...` is optional. If not provided, the image on the card will not be updated.
+* `new_host_name=...` is optional. If not profirstboot.yml
+```text
+ansible-playbook firstboot.yml -i inventory -K
+```
