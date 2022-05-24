@@ -37,6 +37,11 @@ ansible-playbook overlayfs-on.yaml -i inventory -b -K
 ansible-playbook overlayfs-off.yaml -i inventory -b -K
 ```
 
+### Errata (firstboot)
+
+* hard coded host `rpi`
+* hard coded timezone `America/Chicago`
+
 ## prepare a fresh SD card
 
 ### Requirements
@@ -74,10 +79,11 @@ Note: provide `os_image=...` only needed when the OS image is to be written.
 
 Status: All points coded, need to test.
 
-### Errata
+### Errata (provision-local)
 
 * Uses arbitrary mountpoints `/mnt/boot` and `/mnt/rootfs` for manipulating files on the target SD card.
-* `new_host_name=...` is optional. If not profirstboot.yml
+* `new_host_name=...` is optional. If not provided, will remain `raspberrypi`.
+
 ```text
 ansible-playbook firstboot.yml -i inventory -K
 ```
