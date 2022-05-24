@@ -5,7 +5,7 @@
 # Install and provision an SD card on localhost (before first boot.)
 - name: Provision SD card before initial boot
   become: yes
-  hosts: "{{host}}"
+  hosts: rpi
   tasks:
 
   - name: collect IP settings
@@ -14,3 +14,23 @@
 
   - name: show IP settings
     debug: var=ip_settings.stdout_lines
+
+  - name: update/upgrade
+    become: yes
+    apt:
+      cache_valid_time: 3600
+      install_recommends: no
+      upgrade: yes
+      autoclean: yes
+    register: update_upgrade
+
+  - name: show update/upgrade results
+    debug: var=update_upgrade.stdout_lines
+
+  - name: set timezone
+    become: yes
+    command: "timedatectl set-timezone America/Chicago"
+    register: set_timezone
+
+  - name: show set timezone results
+    debug: var=set_timezone.stdout_lines
