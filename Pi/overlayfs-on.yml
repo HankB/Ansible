@@ -15,7 +15,7 @@
 
   - name: Enable RO boot
     shell: >
-      if (grep /boot /etc/fstab | grep -q "defaults.*,rw"); then raspi-config nonint enable_bootro; fi
+      if (grep boot /etc/fstab | grep -q "defaults.*,ro"); then echo already RO; else raspi-config nonint enable_bootro; fi
 
   - name: reboot following changes
     reboot:
