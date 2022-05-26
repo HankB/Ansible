@@ -1,0 +1,17 @@
+---
+
+  - name: verify unattended-upgrades are not installed
+    apt:
+      name: unattended-upgrades
+      state: absent
+
+  - name: Enable Overlay
+    command: >
+      raspi-config nonint enable_overlayfs
+
+  - name: Enable RO boot
+    shell: >
+      if (grep boot /etc/fstab | grep -q "defaults.*,ro"); then echo already RO; else raspi-config nonint enable_bootro; fi
+
+  - name: reboot following changes
+    reboot:

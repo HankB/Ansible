@@ -4,16 +4,4 @@
   hosts: all
 
   tasks:
-  - name: Disable Overlay
-    command: >
-      raspi-config nonint disable_overlayfs
-
-  - name: reboot following disable_overlayfs
-    reboot:
-
-  - name: Disable RO boot
-    command: >
-      raspi-config nonint disable_bootro
-
-  - name: reboot following disable_bootro
-    reboot:
+  - include: overlayfs-off-tasks.yml
