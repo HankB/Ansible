@@ -1,0 +1,7 @@
+---
+
+- name: upgrade/update apt based hosts
+  hosts: all
+
+  tasks:
+  - include: apt-upgrade-tasks.yml
