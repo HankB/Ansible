@@ -33,8 +33,8 @@ ansible -i inventory all -b -K -a "tail /var/log/messages"
 Still need some work on re-enabling R/O `/boot`.
 
 ```text
-ansible-playbook overlayfs-on.yaml -i inventory -b -K
-ansible-playbook overlayfs-off.yaml -i inventory -b -K
+ansible-playbook overlayfs-on.yml -i inventory -l rpi -b -K
+ansible-playbook overlayfs-off.yml -i inventory -b -K
 ```
 
 ### Errata (firstboot)
