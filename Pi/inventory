@@ -10,3 +10,4 @@ localhost
 [iot]
 niwot
 brandywine
+puyallup ansible_user=pi
