@@ -1,0 +1,21 @@
+---
+# noodling around to find a test to determine when the
+# overlayfs is employed (must not update/upograde then)
+
+- name: Facts
+  hosts: all
+
+  tasks:
+  - name: check for overlayfs
+    shell: df /|grep -q overlay
+    register: overlayfs_found
+    ignore_errors: yes
+
+  - name: Print overlayfs_found
+    debug: 
+      var:  overlayfs_found.rc
+
+  - name: use return status
+    debug: 
+      var:  overlayfs_found.rc
+    when: overlayfs_found.rc

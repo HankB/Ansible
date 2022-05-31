@@ -1,0 +1,15 @@
+---
+ - name: Dump
+   hosts: "{{ target|default('localhost') }}"
+   tasks:
+   - name: Facts
+     setup:
+   - name: Dump
+     delegate_to: localhost
+     run_once: true
+     copy:
+       content: "{{ hostvars[inventory_hostname] | to_nice_json }}"
+       dest: /tmp/setup-dump.json
+
+# courtesy of https://stackoverflow.com/questions/49677591/ansible-print-gathered-facts-for-debugging-purposes
+# ansible-playbook dump.yml -i inventrory -e target=hostname

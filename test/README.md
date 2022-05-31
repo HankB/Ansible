@@ -1,0 +1,72 @@
+# test
+
+Miscellaneous playbooks used to test and explore Ansible behavior.
+
+## dump.yml
+
+Dump Ansible `Facts` to a text file.
+
+```text
+hbarta@olive:~/Programming/Ansible/test$ ansible-playbook dump.yml -i nowot, 
+
+PLAY [Dump] ***************************************************************************************************************************************
+
+TASK [Gathering Facts] ****************************************************************************************************************************
+ok: [localhost]
+
+TASK [Facts] **************************************************************************************************************************************
+ok: [localhost]
+
+TASK [Dump] ***************************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP ****************************************************************************************************************************************
+localhost                  : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+hbarta@olive:~/Programming/Ansible/test$
+```
+
+## fstype.yml
+
+Used with Raspbnerry Pi to detect when the `overlayfs` is employed. Examined manually using `df`
+
+```text
+hbarta@niwot:~ $ df
+Filesystem     1K-blocks   Used Available Use% Mounted on
+udev               84028      0     84028   0% /dev
+tmpfs              43984    644     43340   2% /run
+overlay           219904 131940     87964  60% /
+tmpfs             219904      0    219904   0% /dev/shm
+tmpfs               5120      4      5116   1% /run/lock
+/dev/mmcblk0p1    258095  59585    198510  24% /boot
+tmpfs              43980      0     43980   0% /run/user/1000
+hbarta@niwot:~ $ 
+```
+
+```text
+hbarta@olive:~/Programming/Ansible/test$ ansible-playbook fstype.yml -i niwot, 
+
+PLAY [Facts] **************************************************************************************************************************************
+
+TASK [Gathering Facts] ****************************************************************************************************************************
+[WARNING]: Platform linux on host niwot is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change the meaning of that path. See https://docs.ansible.com/ansible/2.10/reference_appendices/interpreter_discovery.html for
+more information.
+ok: [niwot]
+
+TASK [check for overlayfs] ************************************************************************************************************************
+changed: [niwot]
+
+TASK [Print overlayfs_found] **********************************************************************************************************************
+ok: [niwot] => {
+    "overlayfs_found.rc": "0"
+}
+
+TASK [use return status] **************************************************************************************************************************
+skipping: [niwot]
+
+PLAY RECAP ****************************************************************************************************************************************
+niwot                      : ok=3    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+hbarta@olive:~/Programming/Ansible/test$ 
+```
