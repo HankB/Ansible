@@ -94,5 +94,4 @@ It seems like a consistent policy for playbooks (and includes) is to either
 
 or
 
-* Use `become:` for any task that requires root.
-
+* Use `become:` for any task that requires root and not use the `-b` option.
