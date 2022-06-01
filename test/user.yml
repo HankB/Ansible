@@ -1,0 +1,38 @@
+---
+# Demonstrate/determine what user executes commands when become is used
+
+- name: User
+  hosts: all
+
+  tasks:
+  - name: file creation using become
+    become:
+    file: 
+      path: ~/x
+      state: touch
+    register: file_creation_with_become
+
+  - name: Print file_creation_with_become
+    debug: 
+      var:  file_creation_with_become
+
+  - name: file creation no become
+    file: 
+      path: ~/x
+      state: touch
+    register: file_creation_no_become
+
+  - name: Print file_creation_no_become
+    debug: 
+      var:  file_creation_no_become
+
+  - name: file creation using become_user
+    become:
+    file: 
+      path: ~/x
+      state: touch
+    register: file_creation_with_become_user
+
+  - name: Print file_creation_with_become_user
+    debug: 
+      var:  file_creation_with_become_user

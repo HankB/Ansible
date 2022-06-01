@@ -70,3 +70,29 @@ niwot                      : ok=3    changed=1    unreachable=0    failed=0    s
 
 hbarta@olive:~/Programming/Ansible/test$ 
 ```
+
+## user.yml
+
+Determine which user is used for tasks depending on `-b` and `become:`
+
+|host|-b -K|become:|result|
+|---|---|---|---|
+|localhost|no|no|$user|
+|remote|no|no|$user|
+|localhost|no|yes|$user|
+|remote|no|yes|$user|
+|localhost|yes|yes|$user|
+|remote|yes|yes|$user|
+|localhost|yes|no|root|
+|remote|yes|no|root|
+
+It seens that `-b` and `become:` or `become_user:` result in `$user` and root when no `become:` or `become_user:` are specified for a task.
+
+It seems like a consistent policy for playbooks (and includes) is to either 
+
+* Use `-b` and expect all tasks to run as root except those identified with `become:` or `become_user:` (and in this context, `become:` seems misleading.)
+
+or
+
+* Use `become:` for any task that requires root.
+
