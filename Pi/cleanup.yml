@@ -1,5 +1,10 @@
 ---
 
+# Deal with some things that have been overlooked during previous setup/config
+# * timezone
+# * passwordless sudo
+# * locale and LANG settings
+
 - name: miscellaneous cleanup
   hosts: all
 
@@ -9,5 +14,4 @@
 
 
   tasks:
-
     - include: cleanup-tasks.yml
