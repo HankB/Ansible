@@ -18,7 +18,7 @@
 
   - name: which user w/become
     command: echo $USER
-    become_user: root
+    become: # SSH user
     register: which_user_become
 
   - name: Print which_user_become

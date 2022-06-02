@@ -107,4 +107,4 @@ ansible-playbook user-id.yml -i pi@puyallup,
 ansible-playbook user-id.yml -i localhost,
 ```
 
-This uses the (SSH) user name w/out `-b` and uses `root` of `-b` is provided.
+This uses the (SSH) user name w/out `-b` and uses `root` if `-b` is provided.
