@@ -14,6 +14,13 @@ hbarta@rocinante:~$
 
 In particular note that partitions are identified using `p1`, `p2` and so on rather than `1`, `2` as used for SATA devices (e.g. `/dev/sda1`.)
 
+## Policy for '-b', 'become:' and 'become_user: $USER'
+
+These seem to provide the potential to get pretty tangled depending on how they are used and how they (seem) to interact. It is further complicated because the user on home Pis is `hbarta` and on others, it is still `pi`. The policy chosen is
+
+* Use `-b` on the command line. This will cause the `$USER` env var to be set to `root`. Actions where the SSH user need to be accessed can be invoked using `become:` (Note that `become_user:` results in `root`.)
+* Use `become:` when the SSH user is needed. It can be accessed as `$USER`.
+
 ## miscellaneous
 
 Some commands run from `.../Ansible/Pi`
@@ -27,8 +34,8 @@ ansible -i inventory all -b -K -a "tail /var/log/messages"
 
 ## enable/disable overlayfs
 
-* `overlayfs-on.yaml`
-* `overlayfs-off.yaml`
+* `overlayfs-on.yml`
+* `overlayfs-off.yml`
 
 Still need some work on re-enabling R/O `/boot`.
 
