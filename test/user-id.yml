@@ -1,0 +1,26 @@
+---
+# Demonstrate/determine what user executes commands when become is used
+
+- name: User ID
+  hosts: all
+  # Following seems pointless, just substitutes '$USER' for {{USER}}
+  vars:
+    - USER: $USER
+
+  tasks:
+  - name: which user
+    command: echo {{USER}}
+    register: which_user
+
+  - name: Print which_user
+    debug: 
+      var:  which_user
+
+  - name: which user w/become
+    command: echo $USER
+    become_user: root
+    register: which_user_become
+
+  - name: Print which_user_become
+    debug: 
+      var:  which_user_become
