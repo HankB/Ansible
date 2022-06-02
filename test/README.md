@@ -95,3 +95,16 @@ It seems like a consistent policy for playbooks (and includes) is to either
 or
 
 * Use `become:` for any task that requires root and not use the `-b` option.
+
+## user-id.yml
+
+Test ways to substitute the actual (SSH) user ID in commands.
+
+```text
+ansible-playbook user-id.yml -i pi@puyallup, -K
+ansible-playbook user-id.yml -i localhost, -K
+ansible-playbook user-id.yml -i pi@puyallup,
+ansible-playbook user-id.yml -i localhost,
+```
+
+This uses the (SSH) user name w/out `-b` and uses `root` of `-b` is provided.
