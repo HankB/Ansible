@@ -2,9 +2,7 @@
 
 # commands to execute after the first boot for a Raspberry Pi
 
-# Install and provision an SD card on localhost (before first boot.)
-- name: Provision SD card before initial boot
-  become: yes
+- name: Configure a Pi on initial boot
   hosts: rpi
   tasks:
 
@@ -16,7 +14,6 @@
     debug: var=ip_settings.stdout_lines
 
   - name: update/upgrade
-    become: yes
     apt:
       cache_valid_time: 3600
       install_recommends: no
@@ -28,7 +25,6 @@
     debug: var=update_upgrade.stdout_lines
 
   - name: install commonly used applications
-    become: yes
     apt:
       pkg:
       - vim
@@ -40,7 +36,6 @@
     debug: var=SW_install.stdout_lines
 
   - name: set timezone
-    become: yes
     command: "timedatectl set-timezone America/Chicago"
     register: set_timezone
 
