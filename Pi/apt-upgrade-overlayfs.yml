@@ -6,4 +6,5 @@
   tasks:
   - include: overlayfs-off-tasks.yml
   - include: apt-upgrade-tasks.yml
+  - include: cleanup-tasks.yml
   - include: overlayfs-on-tasks.yml

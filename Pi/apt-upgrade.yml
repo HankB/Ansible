@@ -5,3 +5,4 @@
 
   tasks:
   - include: apt-upgrade-tasks.yml
+  - include: cleanup-tasks.yml
