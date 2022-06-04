@@ -9,28 +9,23 @@ Some of these playbooks are intended for use on Pis that use the `overlayfs` (re
 ## Policy for '-b', 'become:' and 'become_user: $USER'
 
 These seem to provide the potential to get pretty tangled depending on how they are used and how they (seem to) interact. It is further complicated because the user on some Pis is `hbarta` and on others, it is still `pi`. The policy chosen is
-16 /dev/mmcblk0
-brw-rw---- 1 root disk 179, 1 May 21 17:16 /dev/mmcblk0p1
-brw-rw---- 1 root disk 179, 2 May 21 17:16 /dev/mmcblk0p2
-hbarta@rocinante:~$
-```
 
-In particular note that partitions are identified using `p1`, `p2` and so on rather than `1`, `2` as used for SATA devices (e.g. `/dev/sda1`.) The playbook should be modified to handle both device naming conventions.
-
-```text
-ansible-playbook provision-local.yml --extra-vars \
-    "sd_dev=/dev/mmcblk0 \`become_user:` results in `root`.)
-* Use `become:` when the SSH user is needed. It can be accessed as `$USER`.
+* Use `-b` on the command line. This will cause the `$USER` env var to be set to `root` when `become:` or `become_user:` are applied to a task.
+* Use `become:` when the SSH user is needed. It can be accessed as `$USER` and will be applied for stuff like `~/` expansion.
+* Use `become_user:` askwhen the user should be `root`. (Not necessary, mentioned because it is non-obvious.)
 
 ## miscellaneous/ad hoc commands
 
-Some commands run from `.../Ansible/Pi`
+Some commands run from `.../Ansible/Pi` (to leverage the inventory file.)
 
-`-b -K` - use `sudo` and ask for password.
+`ansible` command line options: `-b -K` - use `sudo` and prompt for password.
 
 ```text
 ansible -i inventory zberry -m ping
-new_host_name
+ansible -i inventory all -b -K -a "tail /var/log/messages"
+ansible -i inventory -l niwot -a "df /"
+```
+
 ## `cleanup-tasks.yml` `cleanup.yml`
 
 These handle things I might have overlooked during initial configuration. Not all of my Pis were configured using these tools and early versions of the tools might have left some things out. These are ordinarily invoked in the `apt-upgrade...` tasks as a matter of convenience. A version to work with `overlayfs` has not been provided but at present these are safe to run when the `overlayfs` is employed. Of course any settings will be lost at the next reboot.
