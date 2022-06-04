@@ -26,6 +26,15 @@ ansible -i inventory all -b -K -a "tail /var/log/messages"
 ansible -i inventory -l niwot -a "df /"
 ```
 
+## `apt-upgrade-overlayfs.yml`, `apt-upgrade-tasks.yml` and `apt-upgrade.yml`
+
+`apt-upgrade-overlayfs.yml` and `apt-upgrade.yml` include `apt-upgrade-tasks.yml` and in the case of `apt-upgrade-overlayfs.yml` will disable/enable the `overlayfs`.
+
+```text
+ansible-playbook apt-upgrade.yml -i inventory -l brandywine -b -K
+ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l brandywine -b -K
+```
+
 ## `cleanup-tasks.yml` `cleanup.yml`
 
 These handle things I might have overlooked during initial configuration. Not all of my Pis were configured using these tools and early versions of the tools might have left some things out. These are ordinarily invoked in the `apt-upgrade...` tasks as a matter of convenience. A version to work with `overlayfs` has not been provided but at present these are safe to run when the `overlayfs` is employed. Of course any settings will be lost at the next reboot.
