@@ -6,5 +6,5 @@
   tasks:
   - include: overlayfs-off-tasks.yml
   - include: apt-upgrade-tasks.yml
-  - include: cleanup-tasks.yml
+ # - include: cleanup-tasks.yml need to sort out where to putr vars
   - include: overlayfs-on-tasks.yml
