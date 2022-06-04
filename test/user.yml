@@ -27,7 +27,7 @@
       var:  file_creation_no_become
 
   - name: file creation using become_user
-    become:
+    become_user:
     file: 
       path: ~/x
       state: touch
