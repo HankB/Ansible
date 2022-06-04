@@ -24,3 +24,12 @@
   - name: Print which_user_become
     debug: 
       var:  which_user_become
+
+  - name: which user w/become_user
+    command: echo $USER
+    become_user: # root
+    register: which_user_become_user
+
+  - name: Print which_user_become_user
+    debug: 
+      var:  which_user_become_user
