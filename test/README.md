@@ -90,7 +90,7 @@ It seens that `-b` and `become:` or `become_user:` result in `$user` and root wh
 
 It seems like a consistent policy for playbooks (and includes) is to either 
 
-* Use `-b` and expect all tasks to run as root except those identified with `become:` or `become_user:` (and in this context, `become:` seems misleading.)
+* Use `-b` and expect all tasks to run as root except those identified with `become:`. `become_user:` will cause the user to be `root`. (These are the opposite of what I would expect.)
 
 or
 
@@ -101,10 +101,6 @@ or
 Test ways to substitute the actual (SSH) user ID in commands.
 
 ```text
-ansible-playbook user-id.yml -i pi@puyallup, -K
-ansible-playbook user-id.yml -i localhost, -K
-ansible-playbook user-id.yml -i pi@puyallup,
-ansible-playbook user-id.yml -i localhost,
+ansible-playbook user-id.yml -i pi@puyallup, -b -K
+ansible-playbook user-id.yml -i localhost, -b -K
 ```
-
-This uses the (SSH) user name w/out `-b` and uses `root` if `-b` is provided.
