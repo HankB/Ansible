@@ -23,7 +23,8 @@ Some commands run from `.../Ansible/Pi` (to leverage the inventory file.)
 ```text
 ansible -i inventory zberry -m ping
 ansible -i inventory all -b -K -a "tail /var/log/messages"
-ansible -i inventory -l niwot -a "df /"
+ansible -i inventory niwot -a "df /"
+ansible -i inventory niwot -m reboot -b -K
 ```
 
 ## `apt-upgrade-overlayfs.yml`, `apt-upgrade-tasks.yml` and `apt-upgrade.yml`
