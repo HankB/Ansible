@@ -81,7 +81,7 @@
     replace: 
       path: /mnt/rootfs/etc/hosts
       regexp: '(raspberrypi)'
-      replace: '\0{{new_host_name}}'
+      replace: '{{new_host_name}}'
       backup: yes
     when: new_host_name is defined
 
