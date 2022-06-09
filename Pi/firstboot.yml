@@ -3,7 +3,7 @@
 # commands to execute after the first boot for a Raspberry Pi
 
 - name: Configure a Pi on initial boot
-  hosts: rpi
+  hosts: all
   tasks:
 
   - name: collect IP settings
