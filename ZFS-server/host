@@ -1,0 +1,2 @@
+[server]
+example ansible_host=acorn3 ansible_user=root

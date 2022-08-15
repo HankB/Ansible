@@ -1,0 +1,59 @@
+---
+# playbook to finish configuring a host on which Debian has just
+# been installed and which will
+# * add my user
+# * install any desired packages (including sudo)
+# * add my user to sudo group
+# * copy Sanoid from th local PC 
+#   (to get the most recent version vs. the one in the repo.)
+# This requires
+# * root SSH (configured during installation) and passwordless
+#   (e.g. ssh-copy-id root@new_host)
+# * 
+
+- hosts: all
+  vars_files:
+    - ./my_user.yml
+  tasks:
+
+  - name: update and install packages
+    become: yes
+    apt: 
+      cache_valid_time: 3600
+      pkg:
+      - smartmontools
+      - rsync
+      - sudo
+      - vim
+
+  - name: create user home
+    command: zfs create "rpool/home/{{ user_name }}"
+             creates="/home/{{ user_name }}"
+
+  - name: set home directory ownership
+    file: 
+      path: "/home/{{ user_name }}"
+      owner: "{{ user_name }}"
+      group: "{{ user_name }}"
+
+
+  - name: add user
+    user:
+      name: "{{ user_name }}"
+      shell: /bin/bash
+      groups: audio,cdrom,dip,floppy,netdev,plugdev,sudo,video
+      append: yes
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+      password: "{{ user_password }}"
+
+  - name: copy user files from /etc/skel
+    copy:
+      src: "{{ item }}"
+      dest: "/home/{{ user_name }}"
+      owner: "{{ user_name }}"
+      group: "{{ user_name }}"
+      mode: '0644'
+    with_fileglob:
+      - "/etc/skel/.*"
