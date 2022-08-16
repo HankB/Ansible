@@ -1,15 +1,10 @@
 ---
 # playbook to finish configuring a host on which Debian has just
-# been installed and which will
-# * add my user
-# * install any desired packages (including sudo)
-# * add my user to sudo group
-# * copy Sanoid from th local PC 
-#   (to get the most recent version vs. the one in the repo.)
+# been installed with root on ZFS.
 # This requires
 # * root SSH (configured during installation) and passwordless
 #   (e.g. ssh-copy-id root@new_host)
-# * 
+# * ./my_user.yml to specify user, password etc..
 
 - hosts: all
   vars_files:
@@ -25,6 +20,9 @@
       - rsync
       - sudo
       - vim
+      - lzop
+      - mbuffer
+      - git
 
   - name: create user home
     command: zfs create "rpool/home/{{ user_name }}"
@@ -55,5 +53,35 @@
       owner: "{{ user_name }}"
       group: "{{ user_name }}"
       mode: '0644'
+      force: no
     with_fileglob:
       - "/etc/skel/.*"
+
+  - name: add /sbin:/usr/sbin:/usr/local/sbin to path
+    blockinfile:
+      path: "/home/{{ user_name }}/.profile"
+      block: |
+        
+        # add admin paths
+        export PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
+
+  - name: copy sanoid package to target
+    copy:
+      src: ~/Downloads/sanoid_2.1.0_all.deb
+      dest: "/home/{{ user_name }}/tmp/"
+
+  - name: install sanoid on target
+    apt:
+      deb: "/home/{{ user_name }}/tmp/sanoid_2.1.0_all.deb"
+  # It is lift to the admin to provide /etc/sanoid/sanoid.conf
+  # and enable/start /lib/systemd/system/sanoid.timer
+
+  - name: set some git globals
+    become: yes
+    become_user: "{{ user_name }}"
+    args:
+      creates: "/home/{{ user_name }}/.gitconfig"
+    shell: |
+      git config --global user.name "{{ my_git_user }}"
+      git config --global user.email "{{ my_git_email }}"
+      git config --global pull.ff only
