@@ -7,6 +7,9 @@
       - dphys-swapfile
       state: absent
 
+  - name: reboot before enabling overlayfs
+    reboot:
+
   - name: Enable Overlay
     command: >
       raspi-config nonint enable_overlayfs
