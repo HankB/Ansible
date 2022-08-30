@@ -1,8 +1,10 @@
 ---
 
-  - name: verify unattended-upgrades are not installed
+  - name: verify unattended-upgrades, dphys-swapfile are not installed
     apt:
-      name: unattended-upgrades
+      pkg:
+      - unattended-upgrades
+      - dphys-swapfile
       state: absent
 
   - name: Enable Overlay
