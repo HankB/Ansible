@@ -1,0 +1,31 @@
+---
+# Create a ZFS mirror using the indicated drives, properties 
+# and configuration. Pool creatoiun is not supported by the
+# community.general.zfs module.
+
+- name: Facts
+  hosts: user_login
+
+  tasks:
+  - name: create mirror of two drives
+    become: yes
+    args:
+      creates: /pictures
+    shell: >
+      zpool create 
+      -o ashift=12 
+      -o autotrim=on 
+      -O acltype=posixacl 
+      -O xattr=sa -O dnodesize=auto 
+      -O compression=lz4 
+      -O normalization=formD 
+      -O relatime=on 
+      pictures mirror 
+      /dev/disk/by-id/ata-WDC_WD2003FYPS-27Y2B0_WD-WCAVY7294152 
+      /dev/disk/by-id/ata-WDC_WD2003FYPS-27Y2B0_WD-WCAVY6142663
+  
+  - name: set perms on /pictures
+    become: yes
+    file: 
+      path: /pictures
+      mode: "a+rwx"
