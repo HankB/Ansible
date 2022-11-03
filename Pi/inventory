@@ -17,6 +17,5 @@ brandywine
 puyallup ansible_user=pi
 haut
 sodus
-meeker
-192.168.20.40 # meeker/wifi
+192.168.20.41 # meeker/wifi
 
