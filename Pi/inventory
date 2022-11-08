@@ -1,6 +1,8 @@
+# hosts on local LAN
 [all]
 zberry
 charm
+latham
 
 [first]
 rpi
@@ -8,6 +10,7 @@ rpi
 [local]
 localhost
 
+# hosts on IoT LAN
 [iot]
 niwot
 brandywine
