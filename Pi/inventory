@@ -11,7 +11,8 @@ localhost
 [iot]
 niwot
 brandywine
-puyallup ansible_user=pi
+puyallup
 haut
 sodus
+meeker
 
