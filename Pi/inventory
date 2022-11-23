@@ -2,7 +2,8 @@
 [all]
 zberry
 charm
-latham
+192.168.1.168
+
 
 [first]
 rpi
@@ -18,4 +19,5 @@ puyallup ansible_user=pi
 haut
 sodus
 192.168.20.41 # meeker/wifi
+latham
 
