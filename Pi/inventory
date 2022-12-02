@@ -3,7 +3,7 @@
 zberry
 charm
 192.168.1.168
-
+192.168.1.227
 
 [first]
 rpi
@@ -15,7 +15,7 @@ localhost
 [iot]
 niwot
 brandywine
-puyallup ansible_user=pi
+puyallup
 haut
 sodus
 192.168.20.41 # meeker/wifi
