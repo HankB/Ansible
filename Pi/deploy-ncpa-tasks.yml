@@ -1,0 +1,37 @@
+# deploy ncpa package, assuming armhf architecture
+# and install w/out plugins (which can be added later.)
+
+---
+
+  - name: check for overlayfs
+    shell: df /|grep -q overlay
+    register: overlayfs_not_found
+    ignore_errors: yes
+
+  - name: update/upgrade
+    apt:
+      cache_valid_time: 3600
+      install_recommends: no
+      upgrade: yes
+      autoclean: yes
+    register: apt_res
+    retries: 5
+    until: apt_res is success
+    when: "overlayfs_not_found.rc"
+
+  - name: show update/upgrade results
+    debug: var=apt_res.stdout_lines
+
+  - name: install NCPA .deb
+    apt:
+      deb: https://assets.nagios.com/downloads/ncpa/ncpa-2.2.2.armhf.deb
+
+  - name: tailor access token
+    lineinfile:
+      path: /usr/local/ncpa/etc/ncpa.cfg
+      regexp: '^community_string'
+      line: community_string = {{ mytoken }}
+    when: mytoken is defined
+
+  - name: restart listener
+    command: /etc/init.d/ncpa_listener restart

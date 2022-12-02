@@ -1,0 +1,8 @@
+---
+
+- name: deploy NCPA
+  hosts: all
+
+  tasks:
+  - include: deploy-ncpa-tasks.yml
+ # - include: cleanup-tasks.yml need to sort out where to putr vars

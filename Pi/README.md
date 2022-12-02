@@ -44,6 +44,16 @@ These handle things I might have overlooked during initial configuration. Not al
 ansible-playbook cleanup.yml -i inventory -l brandywine -b -K
 ```
 
+## `deploy-ncpa.yml` `deploy-ncpa-tasks.yml`
+
+Argument `mytoken` is required. After deploying to the remote, the configuration needs to be added to the Nagios server.
+
+```text
+ansible-playbook deploy-ncpa.yml -i inventory -l 192.168.1.227 -b -K --extra-vars "mytoken=mytoken"
+```
+
+TODO: `deploy-ncpa-overlayfs.yml` to deploy to host with `overlayfs` enabled. 
+
 ## `firstboot.yml`
 
 This playbook performs several functions that seem easier to do once the Pi has been booted (and after setup via `provision-local.yml`.)
