@@ -44,12 +44,15 @@ These handle things I might have overlooked during initial configuration. Not al
 ansible-playbook cleanup.yml -i inventory -l brandywine -b -K
 ```
 
-## `deploy-ncpa.yml` `deploy-ncpa-tasks.yml`
+## `deploy-ncpa.yml` `deploy-ncpa-tasks.yml` `deploy-ncpa-overlayfs.yml`
 
-Argument `mytoken` is required. After deploying to the remote, the configuration needs to be added to the Nagios server.
+This playbook is intended to install the NCPA package on a Pi Zero to support monitoring via Natios. It does not install any plugins and does not perform the server configuration. Perhaps in the future, but my chops are not up to dealing with more than one host at a time. `deploy-ncpa.yml` deploys to a host and `deploy-ncpa-overlayfs.yml` deploys to a host which has had `overlayfs` enabled. This may work for other Pis running Raspbian and should work with both 32 bit and 64 bit variants. It will not work with a 64 bit Debian Pi unless `armhf` architecture has been enabled in advance and has not been tested with any 32 bit Debian. Since the Debian package downloaded from the Nagios web site is hard coded for the `armhf` architecture it will not work for `amd64` systems.
+
+Argument `mytoken` is required. I have not tested without it.
 
 ```text
 ansible-playbook deploy-ncpa.yml -i inventory -l 192.168.1.227 -b -K --extra-vars "mytoken=mytoken"
+ansible-playbook deploy-ncpa-overlayfs.yml -i inventory -l testberry -b -K --extra-vars "mytoken=mytoken"
 ```
 
 TODO: `deploy-ncpa-overlayfs.yml` to deploy to host with `overlayfs` enabled. 
