@@ -18,6 +18,10 @@ brandywine
 puyallup
 haut
 sodus
+<<<<<<< HEAD
 192.168.20.41 # meeker/wifi
 latham
+=======
+meeker
+>>>>>>> refs/remotes/origin/main
 
