@@ -1,0 +1,39 @@
+# deploy ncpa package, assuming armhf architecture
+# and install w/out plugins (which can be added later.)
+
+---
+
+  - name: check for overlayfs
+    shell: df /|grep -q overlay
+    register: overlayfs_not_found
+    ignore_errors: yes
+
+  - name: update/upgrade
+    apt:
+      cache_valid_time: 3600
+      install_recommends: no
+      upgrade: yes
+      autoclean: yes
+    register: apt_res
+    retries: 5
+    until: apt_res is success
+    when: "overlayfs_not_found.rc"
+
+  - name: show update/upgrade results
+    debug: var=apt_res.stdout_lines
+
+  - name: remove ncpa agent if installed
+    apt:
+      pkg:
+      - NCPA
+      state: absent
+
+  - name: Copy file with owner and permissions
+    ansible.builtin.copy:
+      src: ~/Downloads/{{ agent_deb }}
+      dest: /tmp/{{ agent_deb }}
+      mode: '0644'
+
+  - name: install Checkmk agent .deb
+    apt:
+      deb: /tmp/{{ agent_deb }}
