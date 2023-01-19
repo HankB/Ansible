@@ -55,7 +55,16 @@ ansible-playbook deploy-ncpa.yml -i inventory -l 192.168.1.227 -b -K --extra-var
 ansible-playbook deploy-ncpa-overlayfs.yml -i inventory -l testberry -b -K --extra-vars "mytoken=mytoken"
 ```
 
-TODO: `deploy-ncpa-overlayfs.yml` to deploy to host with `overlayfs` enabled. 
+TODO: Not going forward with Nagios so NCPA left as is.
+
+## `deploy-checkmk-agent-overlayfs.yml` `deploy-checkmk-agent-tasks.yml`
+
+Playbooks to deploy the Checkmk agent to Raspberry Pis that employ the read only FS. The name for the agent file is provided by an environment variable and expected to be in `~/Downloads`.
+
+```text
+ansible-playbook deploy-checkmk-agent-overlayfs.yml -i inventory -l rpi -b -K --extra-vars "agent_deb=deb-file-name"
+ansible-playbook deploy-checkmk-agent.yml -i inventory -l rpi -b -K --extra-vars "agent_deb=deb-file-name"
+```
 
 ## `firstboot.yml`
 

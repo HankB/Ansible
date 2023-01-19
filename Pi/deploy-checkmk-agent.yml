@@ -1,0 +1,7 @@
+---
+
+- name: deploy Checkmk agent
+  hosts: all
+
+  tasks:
+  - include: deploy-checkmk-agent-tasks.yml
