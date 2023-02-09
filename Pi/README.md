@@ -34,7 +34,8 @@ ansible -i inventory niwot -m reboot -b -K
 ```text
 ansible-playbook apt-upgrade.yml -i inventory -l brandywine -b -K
 ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l brandywine -b -K
-ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l 'iot:!niwot' -b -K```
+ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l 'iot:!niwot' -b -K
+```
 
 ## `cleanup-tasks.yml` `cleanup.yml`
 
