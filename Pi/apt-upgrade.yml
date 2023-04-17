@@ -4,5 +4,5 @@
   hosts: all
 
   tasks:
-  - include: apt-upgrade-tasks.yml
+  - include_tasks: apt-upgrade-tasks.yml
  # - include: cleanup-tasks.yml need to sort out where to putr vars

@@ -4,7 +4,7 @@
   hosts: all
 
   tasks:
-  - include: overlayfs-off-tasks.yml
-  - include: apt-upgrade-tasks.yml
+  - include_tasks: overlayfs-off-tasks.yml
+  - include_tasks: apt-upgrade-tasks.yml
  # - include: cleanup-tasks.yml need to sort out where to putr vars
-  - include: overlayfs-on-tasks.yml
+  - include_tasks: overlayfs-on-tasks.yml
