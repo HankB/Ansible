@@ -5,17 +5,30 @@
     register: overlayfs_not_found
     ignore_errors: yes
 
-  - name: update/upgrade
+  - name: update
+    apt:
+      cache_valid_time: 3600
+      upgrade: no
+    register: update_result
+    retries: 5
+    until: update_result is success
+    when: "overlayfs_not_found.rc"
+
+  - name: list upgradeable
+    shell: apt list --upgradeable
+    register: upgradeable
+
+  - name: show update results
+    debug: var=upgradeable.stdout_lines
+
+  - name: upgrade/update
     apt:
       cache_valid_time: 3600
       install_recommends: no
       upgrade: yes
       autoclean: yes
-    register: apt_res
     retries: 5
-    until: apt_res is success
+    register: upgrade_res
+    until: upgrade_res is success
     when: "overlayfs_not_found.rc"
-
-  - name: show update/upgrade results
-    debug: var=apt_res.stdout_lines
 
