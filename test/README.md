@@ -110,3 +110,13 @@ ansible-playbook user-id.yml -i localhost, -b -K
 Problem: These can be in the format of `/dev/sdX` or (when there is an MMC slot on the PC) `/dev/mmc*` The ansible script needs to determine which is being used and modify device references accordingly.
 
 See `dev.yml` for a start on that.
+
+## 2023-04-17 list-upgradeable.yml
+
+Problem: `stdout` from `apt upgrade` overflows the screen buffer, making it not possible to easily see which packages were updated.
+
+Solution: perform the `update` and `upgrade` in different steps and following the `update`, report the output of `apt list --upgradeable`. This playubook simply performs the `update` and then reports the results.
+
+```text
+ansible-playbook list-upgradeable.yml -i amity, -K -b
+```
