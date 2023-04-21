@@ -119,4 +119,5 @@ Solution: perform the `update` and `upgrade` in different steps and following th
 
 ```text
 ansible-playbook list-upgradeable.yml -i amity, -K -b
+ansible-playbook list-upgradeable.yml -i inventory -K -b
 ```
