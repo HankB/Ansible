@@ -21,7 +21,7 @@
   - name: show update results
     debug: var=upgradeable.stdout_lines
 
-  - name: upgrade/update
+  - name: upgrade
     apt:
       cache_valid_time: 3600
       install_recommends: no
