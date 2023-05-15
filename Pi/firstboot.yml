@@ -30,6 +30,10 @@
       - vim
       - mosquitto-clients
       - tree
+      - lsof
+      - mbuffer
+      - s-tui
+      - stress-ng
     register: SW_install
 
   - name: show S/W install results
