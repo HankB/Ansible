@@ -34,7 +34,7 @@
 
   - name: mount new boot partition
     become: yes
-    shell: "mount {{sd_dev}}p1 /mnt/boot"
+    shell: "mount {{sd_dev}}1 /mnt/boot"
 
   - name: copy three files to boot partition
     become: yes
@@ -54,7 +54,7 @@
 
   - name: unmount new boot partition
     become: yes
-    shell: "umount {{sd_dev}}p1"
+    shell: "umount {{sd_dev}}1"
 
 # Mount and fiddle with eventual / partition
 
@@ -66,7 +66,7 @@
 
   - name: mount new rootfs partition
     become: yes
-    shell: "mount {{sd_dev}}p2 /mnt/rootfs"
+    shell: "mount {{sd_dev}}2 /mnt/rootfs"
 
   - name: update hostname in /etc/hostname
     become: yes
@@ -97,4 +97,4 @@
 
   - name: unmount new rootfs partition
     become: yes
-    shell: "umount {{sd_dev}}p2"
+    shell: "umount {{sd_dev}}2"
