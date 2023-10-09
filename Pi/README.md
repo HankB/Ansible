@@ -79,7 +79,7 @@ In particular note that partitions are identified using `p1`, `p2` and so on rat
 
 ```text
 ansible-playbook provision-local.yml -b -K --extra-vars \
-    "sd_dev=/dev/mmcblk0 part_pfx="p" \
+    "sd_dev=/dev/mmcblk0 part_pfx=p \
     os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz \
     new_host_name=somehostname"
 ```
