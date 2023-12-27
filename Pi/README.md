@@ -102,7 +102,7 @@ In particular note that partitions are identified using `p1`, `p2` and so on rat
 
 ```text
 ansible-playbook provision-local.yml -b -K --extra-vars \
-    "sd_dev=/dev/mmcblk0 \
+    "sd_dev=/dev/mmcblk0 part_pfx=p \
     os_image=/home/hbarta/Downloads/Pi/2022-04-04-raspios-bullseye-armhf-lite.img.xz \
     new_host_name=somehostname"
 ```
@@ -111,3 +111,4 @@ The following variables can be set on the command line
 * `sd_dev` - required
 * `os_image` - /path/to/os/image. If not provided, writing the OS image will be skipped.
 * `new_host_name` If not provided, the default host name `raspberrypi` will remain.
+* `part_pfx` Partition Prefix - e.g. "p" for NVME or MMC and nothing for SATA - (`/dev/sda1` vs. `/dev/nvme0n1p1`)
