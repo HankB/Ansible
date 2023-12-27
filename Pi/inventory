@@ -4,7 +4,6 @@ charm
 
 [first]
 rpi
-display1
 
 [local]
 localhost
