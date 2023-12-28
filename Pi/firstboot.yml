@@ -44,10 +44,11 @@
       path: /etc/sudoers.d/010_pi-nopasswd
     register: passwordless_enabled
 
-  - name: prevent passwordless sudo
-    become: yes
-    shell: "mv /etc/sudoers.d/010_pi-nopasswd /etc/sudoers.d/010_pi-nopasswd~"
-    when: passwordless_enabled.stat.exists
+  - name: Disable paswordless login (requires Ansible >= 2.4)
+    ansible.builtin.replace:
+      path: /etc/sudoers.d/010_pi-nopasswd
+      regexp: 'NOPASSWD'
+      replace: 'PASSWD'
 
   - name: add button/off line to /boot/config.txt
     become: yes
