@@ -39,6 +39,15 @@
   - name: show S/W install results
     debug: var=SW_install.stdout_lines
 
+  - name: Check if passwordless sudo enabled
+    stat:
+      path: /etc/sudoers.d/010_pi-nopasswd
+    register: passwordless_enabled
+
+  - name: prevent passwordless sudo
+    become: yes
+    shell: "mv /etc/sudoers.d/010_pi-nopasswd /etc/sudoers.d/010_pi-nopasswd~"
+    when: passwordless_enabled.stat.exists
 
   - name: reboot following updates
     reboot:
