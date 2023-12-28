@@ -86,7 +86,7 @@ ansible-playbook overlayfs-off.yml -i inventory -b -K
 
 ## `provision-local.yml`
 
-*Deprecated as of RpiOS bookworm edition.* The new `rpi-imager` program uses other medhods to configure WiFi etc. At present it just makes  more sense to use that to provision the media and follow with `firstboot.yml`.
+*Deprecated as of RpiOS bookworm edition.* The new `rpi-imager` program uses other medhods to configure WiFi etc. At present it just makes  more sense to use that to provision the media and follow with `firstboot.yml`. Some functionality from `provision-local.yml` has been added to `firstboot.yml`,
 
 This playbook is expected to be run with `localhost` as the target in order to copy an image to an SD card and perform some actions I normally do before the first boot. It will look for a directory `~/.secrets` and copy `ssh` `wpa_supplicant.conf` and `userconf.txt` needed for headless first boot. When you create these you should take care to apply safe permissions (as with `~/.ssh`.) (A useful addition to this playbook would be to create these files if not found rather than fail.)
 
