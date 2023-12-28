@@ -49,5 +49,11 @@
     shell: "mv /etc/sudoers.d/010_pi-nopasswd /etc/sudoers.d/010_pi-nopasswd~"
     when: passwordless_enabled.stat.exists
 
+  - name: add button/off line to /boot/config.txt
+    become: yes
+    lineinfile:
+      path: /boot/config.txt
+      line: 'dtoverlay=gpio-shutdown,gpio_pin=7,active_low=1,gpio_pull=up'
+
   - name: reboot following updates
     reboot:
