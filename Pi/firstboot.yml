@@ -34,6 +34,7 @@
       - mbuffer
       - s-tui
       - stress-ng
+      - i2c-tools
     register: SW_install
 
   - name: show S/W install results
