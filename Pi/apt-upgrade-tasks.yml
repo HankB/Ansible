@@ -4,6 +4,7 @@
     shell: df /|grep -q overlay
     register: overlayfs_not_found
     ignore_errors: yes
+    tags: always
 
   - name: update
     apt:
@@ -13,13 +14,16 @@
     retries: 5
     until: update_result is success
     when: "overlayfs_not_found.rc"
+    tags: always
 
   - name: list upgradeable
     shell: apt list --upgradeable
     register: upgradeable
+    tags: always
 
   - name: show update results
     debug: var=upgradeable.stdout_lines
+    tags: always
 
   - name: upgrade
     apt:
@@ -31,4 +35,19 @@
     register: upgrade_res
     until: upgrade_res is success
     when: "overlayfs_not_found.rc"
+    tags: always
+
+  - name: identify autoremove candidates
+    shell: apt-get --dry-run autoremove | grep Remv || true
+    register: autoremove_list
+    tags: always
+
+  - name: show autoremove candidates
+    debug: var=autoremove_list.stdout_lines
+    tags: always
+
+  - name: autoremove when requested
+    apt:
+      autoremove: yes
+    tags: [ never, autoremove ]
 
