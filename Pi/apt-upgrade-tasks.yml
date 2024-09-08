@@ -46,8 +46,15 @@
     debug: var=autoremove_list.stdout_lines
     tags: always
 
-  - name: autoremove when requested
+  - name: Request autoremove permission
+    ansible.builtin.pause:
+      prompt: "Perform autoremove? Y/N"
+    register: answer
+    tags: always
+    run_once: true
+
+  - name: Execute autoremove
     apt:
       autoremove: yes
-    tags: [ never, autoremove ]
-
+    when: answer.user_input == "Y"
+    tags: always
