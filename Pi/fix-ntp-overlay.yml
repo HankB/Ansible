@@ -1,0 +1,9 @@
+---
+
+- name: fix NTP server for hosts that employ overlayfs
+  hosts: all
+
+  tasks:
+  - include_tasks: overlayfs-off-tasks.yml
+  - include_tasks: fix-ntp-tasks.yml
+  - include_tasks: overlayfs-on-tasks.yml

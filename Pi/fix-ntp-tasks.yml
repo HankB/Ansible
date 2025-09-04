@@ -1,0 +1,20 @@
+# Switch NTP server from 192.168.1.1 to 10.20.0.1
+# and add fallbacks to pool servers. Change is
+# made in /etc/systemd/timesyncd.conf.d/ntp.conf
+
+---
+
+  - name: Update NTP server
+    ansible.builtin.lineinfile:
+      path: /etc/systemd/timesyncd.conf.d/ntp.conf
+      regexp: '^NTP=.*$'
+      line: 'NTP=10.20.0.1'
+      create: true
+      backup: yes # Creates a backup of the original file before modification
+
+  - name: Add fallback servers
+    ansible.builtin.lineinfile:
+      path: /etc/systemd/timesyncd.conf.d/ntp.conf
+      line: 'FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org'
+      state: present
+      create: true

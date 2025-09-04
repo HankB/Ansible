@@ -114,3 +114,12 @@ The following variables can be set on the command line
 * `os_image` - /path/to/os/image. If not provided, writing the OS image will be skipped.
 * `new_host_name` If not provided, the default host name `raspberrypi` will remain.
 * `part_pfx` Partition Prefix - e.g. "p" for NVME or MMC and nothing for SATA - (`/dev/sda1` vs. `/dev/nvme0n1p1`)
+
+## `fix-ntp-overlay.yml` `fix-ntp-tasks.yml`
+
+This came about because the local router was reconfigured, changing is's IP and requiring an update to the NTP settings for some hosts.
+
+```text
+ansible-playbook fix-ntp-overlay.yml -i inventory -l iot_n -b -K
+ansible-playbook fix-ntp.yml -i inventory -l zperry -b -K
+```
