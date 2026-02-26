@@ -30,7 +30,8 @@
       cache_valid_time: 3600
       install_recommends: no
       upgrade: yes
-      autoclean: yes
+      autoclean: true
+      clean: true
     retries: 5
     register: upgrade_res
     until: upgrade_res is success
