@@ -1,61 +1,54 @@
 ---
-
   - name: check for overlayfs
     shell: df /|grep -q overlay
     register: overlayfs_not_found
-    ignore_errors: yes
+    failed_when: false
     tags: always
 
-  - name: update
-    apt:
-      cache_valid_time: 3600
-      upgrade: no
-    register: update_result
-    retries: 5
-    until: update_result is success
-    when: "overlayfs_not_found.rc"
+  - name: Run apt tasks when not using overlayfs
+    when: overlayfs_not_found.rc != 0
     tags: always
+    block:
+      - name: update
+        apt:
+          cache_valid_time: 3600
+          upgrade: no
+        register: update_result
+        retries: 5
+        until: update_result is success
 
-  - name: list upgradeable
-    shell: apt list --upgradeable
-    register: upgradeable
-    tags: always
+      - name: list upgradeable
+        shell: apt list --upgradeable
+        register: upgradeable
 
-  - name: show update results
-    debug: var=upgradeable.stdout_lines
-    tags: always
+      - name: show update results
+        debug: var=upgradeable.stdout_lines
 
-  - name: upgrade
-    apt:
-      cache_valid_time: 3600
-      install_recommends: no
-      upgrade: yes
-      autoclean: true
-      clean: true
-    retries: 5
-    register: upgrade_res
-    until: upgrade_res is success
-    when: "overlayfs_not_found.rc"
-    tags: always
+      - name: upgrade
+        apt:
+          cache_valid_time: 3600
+          install_recommends: no
+          upgrade: yes
+          autoclean: true
+          clean: true
+        retries: 5
+        register: upgrade_res
+        until: upgrade_res is success
 
-  - name: identify autoremove candidates
-    shell: apt-get --dry-run autoremove | grep Remv || true
-    register: autoremove_list
-    tags: always
+      - name: identify autoremove candidates
+        shell: apt-get --dry-run autoremove | grep Remv || true
+        register: autoremove_list
 
-  - name: show autoremove candidates
-    debug: var=autoremove_list.stdout_lines
-    tags: always
+      - name: show autoremove candidates
+        debug: var=autoremove_list.stdout_lines
 
-  - name: Request autoremove permission
-    ansible.builtin.pause:
-      prompt: "Perform autoremove? Y/N"
-    register: answer
-    tags: always
-    run_once: true
+      - name: Request autoremove permission
+        ansible.builtin.pause:
+          prompt: "Perform autoremove? Y/N"
+        register: answer
+        run_once: true
 
-  - name: Execute autoremove
-    apt:
-      autoremove: yes
-    when: answer.user_input == "Y"
-    tags: always
+      - name: Execute autoremove
+        apt:
+          autoremove: yes
+        when: answer.user_input == "Y"
