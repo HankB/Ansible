@@ -4,4 +4,4 @@
   hosts: all
 
   tasks:
-  - include: overlayfs-on-tasks.yml
+  - include_tasks: overlayfs-on-tasks.yml
