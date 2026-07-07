@@ -1,0 +1,52 @@
+---
+  - name: check whether NetworkManager is active
+    command: systemctl is-active NetworkManager
+    register: nm_active
+    changed_when: false
+    failed_when: false
+
+  - name: set fact for wifi powersave method
+    set_fact:
+      use_networkmanager: "{{ nm_active.stdout == 'active' }}"
+
+  - name: look up NetworkManager connection name for wlan0
+    shell: >
+      nmcli -t -f DEVICE,CONNECTION device | awk -F: '$1=="wlan0"{print $2}'
+    register: wifi_connection_name
+    changed_when: false
+    when: use_networkmanager
+
+  - name: disable wifi powersave via NetworkManager connection profile
+    command: >
+      nmcli connection modify "{{ wifi_connection_name.stdout }}" 802-11-wireless.powersave 2
+    when:
+      - use_networkmanager
+      - wifi_connection_name.stdout | length > 0
+
+  - name: install systemd unit to disable wifi power management (non-NetworkManager hosts)
+    copy:
+      dest: /etc/systemd/system/wifi-powersave-off.service
+      owner: root
+      group: root
+      mode: "0644"
+      content: |
+        [Unit]
+        Description=Disable WiFi power management on wlan0
+        After=sys-subsystem-net-devices-wlan0.device network.target
+        Wants=network.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/sbin/iw dev wlan0 set power_save off
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
+    when: not use_networkmanager
+
+  - name: enable wifi-powersave-off service (non-NetworkManager hosts)
+    systemd:
+      name: wifi-powersave-off.service
+      enabled: true
+      daemon_reload: true
+    when: not use_networkmanager
