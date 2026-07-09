@@ -1,4 +1,6 @@
 ---
+# Provided by Claude AI
+#
   - name: check whether NetworkManager is active
     command: systemctl is-active NetworkManager
     register: nm_active
