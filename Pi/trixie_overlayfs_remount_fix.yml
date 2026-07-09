@@ -1,0 +1,101 @@
+---
+# trixie_overlayfs_remount_fix.yml
+# 
+# Provided by Claude AI
+#
+# Fixes systemd-remount-fs.service failing under OverlayFS on Debian Trixie
+# (util-linux >= 2.40 prefers the new fsopen/fsconfig mount API, which
+# overlayfs rejects for reconfigure: "No changes allowed in reconfigure").
+# Not needed on Bookworm (util-linux 2.38.1 — bug doesn't exist there).
+#
+# Include this from the playbook that enables OverlayFS, e.g.:
+#
+#   - hosts: overlayfs_hosts
+#     tasks:
+#       - import_tasks: trixie_overlayfs_remount_fix.yml
+#
+# Or as a role's tasks/main.yml. Idempotent; safe to re-run.
+
+- name: Determine Trixie-specific overlayfs remount-fs workaround applicability
+  ansible.builtin.set_fact:
+    needs_remount_fs_workaround: "{{ ansible_facts['distribution_release'] == 'trixie' }}"
+
+# --- systemd-remount-fs / LIBMOUNT_FORCE_MOUNT2 fix (Trixie only) ---------
+
+- name: Ensure systemd-remount-fs drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/systemd-remount-fs.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: needs_remount_fs_workaround
+
+- name: Install LIBMOUNT_FORCE_MOUNT2 override for systemd-remount-fs
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/systemd-remount-fs.service.d/override.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Service]
+      Environment=LIBMOUNT_FORCE_MOUNT2=always
+  when: needs_remount_fs_workaround
+  register: remount_fs_dropin
+
+- name: Reload systemd units after drop-in change
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: remount_fs_dropin.changed
+
+- name: Restart systemd-remount-fs.service to apply the workaround
+  ansible.builtin.systemd:
+    name: systemd-remount-fs.service
+    state: restarted
+  when: remount_fs_dropin.changed
+
+# --- Legacy Raspberry Pi swap package cleanup -----------------------------
+# Not confirmed to be Trixie-specific. Currently only run where you've
+# actually observed the rpi-resize-swap-file.service failure. Remove the
+# "when" guard below (or set an explicit host var) once you've verified
+# it's needed / safe on Bookworm hosts too.
+
+- name: Purge legacy Raspberry Pi swap-management packages
+  ansible.builtin.apt:
+    name:
+      - rpi-swap
+      - systemd-zram-generator
+      - rpi-systemd-config
+    state: absent
+    purge: true
+  when: needs_remount_fs_workaround
+  register: rpi_swap_purge
+
+- name: Remove orphaned /var/swap file left behind by rpi-swap
+  ansible.builtin.file:
+    path: /var/swap
+    state: absent
+  when: needs_remount_fs_workaround
+
+- name: Reload systemd unit files after package purge
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: rpi_swap_purge.changed
+
+- name: Clear stale failed-unit records left by removed packages
+  ansible.builtin.command: systemctl reset-failed
+  when: rpi_swap_purge.changed
+  changed_when: false
+
+# --- Verification ----------------------------------------------------------
+
+- name: Check for any remaining failed units
+  ansible.builtin.command: systemctl --failed --no-legend
+  register: failed_units
+  changed_when: false
+  failed_when: false
+
+- name: Report any remaining failed units
+  ansible.builtin.debug:
+    msg: "Failed units remain on {{ inventory_hostname }}: {{ failed_units.stdout_lines }}"
+  when: failed_units.stdout_lines | length > 0

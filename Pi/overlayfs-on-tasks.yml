@@ -8,6 +8,7 @@
       state: absent
 
   - include_tasks: wifi-powersave-off-tasks.yml
+  - include_tasks: trixie_overlayfs_remount_fix.yml
 
   - name: reboot before enabling overlayfs
     reboot:
