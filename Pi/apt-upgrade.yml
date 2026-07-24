@@ -7,4 +7,19 @@
   - include_tasks: apt-upgrade-tasks.yml
     tags: always
 
- # - include: cleanup-tasks.yml need to sort out where to putr vars
+  - include_tasks:
+      file: checkmk_agent_update.yml
+      apply:
+        tags: [checkmk-agent]
+    tags: [checkmk-agent]
+    when: checkmk_agent_version is defined
+
+  - include_tasks:
+      file: checkmk_agent_register.yml
+      apply:
+        tags: [checkmk-register]
+    tags: [checkmk-register]
+    when: checkmk_agent_register | default(false) | bool
+
+  - include_tasks: cleanup-tasks.yml
+    tags: always

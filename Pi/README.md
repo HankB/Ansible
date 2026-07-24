@@ -1,10 +1,18 @@
-# playbooks for a Raspberry Pi
+# playbooks for a Raspberry Pi and other Debian based hosts
 
 Support initial configuration and ongoing maintenance for Raspberry Pis running Raspberry Pi OS. These have lots of things hard coded like language and timezone settings. Others enshrine personal policies such as no passwordless sudo. If you need somethhing different, either fork and modify to suit your needs or submit a PR with modifications to provide options to tailor these to other settings preferences. In particular my `inventory` file is not likely to be useful for anyone else.
 
+## Status as of 2026-07-23
+
+I have just completed a *lot* of work, guiding Claude Sonnet 5/Medium to upgrade Checkmk agents. I use Checkmk Community 2.5.0p9. After recently upgrading from a pre 2.5 release, I needed to install upgraded agents on all of my monitored hosts. Had I known how much effort it would be, I might have just done that namually as I did with the initial rollout. But now it's done.
+
+The result is that there will be a lot of extra stuff that users not using Checkmk can ignore by just leaving some command line arguments off. Unfortunately without `--ask-vault-pass` the playbooks will error out. It would be necessary to to create your own vault just to get past this. Or remove that functionality. I haven't explored that further at this time.
+
+The organization of these playbooks also reflects my level of sophistication WRT Ansible and use includes rather than roles. Some day I may get brave and rework that.
+
 ## Packaging
 
-Some of these playbooks are intended for use on Pis that use the `overlayfs` (readonly) file system. Some playbooks can be used for any Pi. My practice is to provide a playbook named `<playbook-name>.yml` which then includes `<playbook-name>-tasks.yml`. When needed, a `<playbook-name>-overlayufs.yml` is also provided that will include tasks that disable/enable the `overlayfs` before and after including the desired tasks. The `overlayfs` variants can be run on a Pi that does not have the `overlayfs` configured and the end result will be that the `overlayfs` will then be configured on that host.
+Some of these playbooks are intended for use on Pis that use the `overlayfs` (readonly) file system. Some playbooks can be used for any Pi. My practice is to provide a playbook named `<playbook-name>.yml` which then includes `<playbook-name>-tasks.yml`. When needed, a `<playbook-name>-overlayfs.yml` is also provided that will include tasks that disable/enable the `overlayfs` before and after including the desired tasks. The `overlayfs` variants can be run on a Pi that does not have the `overlayfs` configured and the end result will be that the `overlayfs` will then be configured on that host.
 
 ## Policy for '-b', 'become:' and 'become_user: $USER'
 
@@ -12,7 +20,7 @@ These seem to provide the potential to get pretty tangled depending on how they 
 
 * Use `-b` on the command line. This will cause the `$USER` env var to be set to `root` when `become:` or `become_user:` are applied to a task.
 * Use `become:` when the SSH user is needed. It can be accessed as `$USER` and will be applied for stuff like `~/` expansion.
-* Use `become_user:` askwhen the user should be `root`. (Not necessary, mentioned because it is non-obvious.)
+* Use `become_user:` ask when the user should be `root`. (Not necessary, mentioned because it is non-obvious.)
 
 ## miscellaneous/ad hoc commands
 
@@ -27,19 +35,69 @@ ansible -i inventory niwot -a "df /"
 ansible -i inventory niwot -m reboot -b -K
 ```
 
-## `apt-upgrade-overlayfs.yml`, `apt-upgrade-tasks.yml` and `apt-upgrade.yml`
+## Files
 
-`apt-upgrade-overlayfs.yml` and `apt-upgrade.yml` include `apt-upgrade-tasks.yml` and in the case of `apt-upgrade-overlayfs.yml` will disable/enable the `overlayfs`.
+I have added subdirectories for several functions:
+
+* Cache agent packages and the smart_posix plugin (which are pulled from my Checkmk instance.)
 
 ```text
-ansible-playbook apt-upgrade.yml -i inventory -l brandywine -b -K
-ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l brandywine -b -K
-ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l 'iot:!niwot' -b -K
+barta@olive:~/Programming/Ansible/Pi$ tree files
+files
+└── checkmk-agent-cache
+    ├── check-mk-agent_2.5.0p9-1_all.deb
+    ├── check-mk-agent_2.5.0p9-1_arm64.deb
+    └── smart_posix
+
+2 directories, 3 files
+hbarta@olive:~/Programming/Ansible/Pi$ 
+```
+
+* Various configuration files, probably specific to my setup:
+
+```text
+hbarta@olive:~/Programming/Ansible/Pi$ tree group_vars host_vars
+group_vars
+└── all
+    ├── vars.yml
+    └── vault.yml
+host_vars
+├── dragohost.yml
+└── drago.yml
+
+3 directories, 4 files
+hbarta@olive:~/Programming/Ansible/Pi$
+```
+
+In particular, the user will want to inspect `group_vars/all/vars.yml` and edit as appropriate.
+
+## `apt-upgrade-overlayfs.yml`, `apt-upgrade-tasks.yml` and `apt-upgrade.yml`
+
+`apt-upgrade-overlayfs.yml` and `apt-upgrade.yml` include `apt-upgrade-tasks.yml` and in the case of `apt-upgrade-overlayfs.yml` will disable/enable the `overlayfs`. Both have been expanded to install/upgrade the Checkmk agent when the correct command line arguments are provided.
+
+```text
+# typical update:
+ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K --ask-vault-pass
+# update and upgrade Checkmk agent and register host:
+ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K \
+    --tags checkmk-agent,checkmk-register \
+    -e checkmk_agent_version=2.5.0p9 \
+    -e checkmk_agent_register=true \
+    --ask-vault-pass
+
+# typical update
+ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l iot_n -b -K --ask-vault-pass
+# update and iupgrade Checkmk agent (It is only applied to Pi Zeros for which support
+# is not provided to register the host so that task is not included)
+ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l iot_n -b -K \
+  --tags checkmk-agent -e checkmk_agent_version=2.5.0p9 --ask-vault-pass
 ```
 
 ## `cleanup-tasks.yml` `cleanup.yml`
 
 These handle things I might have overlooked during initial configuration. Not all of my Pis were configured using these tools and early versions of the tools might have left some things out. These are ordinarily invoked in the `apt-upgrade...` tasks as a matter of convenience. A version to work with `overlayfs` has not been provided but at present these are safe to run when the `overlayfs` is employed. Of course any settings will be lost at the next reboot.
+
+This task is now include with `apt-upgrade.yml` and `apt-upgrade-overlayfs.yml`
 
 ```text
 ansible-playbook cleanup.yml -i inventory -l brandywine -b -K
@@ -66,6 +124,8 @@ Playbooks to deploy the Checkmk agent to Raspberry Pis that employ the read only
 ansible-playbook deploy-checkmk-agent-overlayfs.yml -i inventory -l rpi -b -K --extra-vars "agent_deb=deb-file-name"
 ansible-playbook deploy-checkmk-agent.yml -i inventory -l rpi -b -K --extra-vars "agent_deb=deb-file-name"
 ```
+
+Deprecated and no longer supported. this functionality has been rewritten and folded into `apt-upgrade-overlayfs.yml` and `apt-upgrade.yml`.
 
 ## `firstboot.yml`
 
@@ -121,5 +181,9 @@ This came about because the local router was reconfigured, changing is's IP and 
 
 ```text
 ansible-playbook fix-ntp-overlay.yml -i inventory -l iot_n -b -K
-ansible-playbook fix-ntp.yml -i inventory -l zperry -b -K
+ansible-playbook fix-ntp.yml -i inventory -l zberry -b -K
 ```
+
+## `checkmk_agent_update.yml` `checkmk_agent_register.yml`
+
+These playbooks upgrade or install the Checkmk agent and register the host, respectively. Note that Armhf hosts (Pi Zeroes and similar) are not supported for registration.

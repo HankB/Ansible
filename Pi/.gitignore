@@ -1,0 +1,3 @@
+# files pulled from my checkmk install
+check-mk-agent*
+smart_posix

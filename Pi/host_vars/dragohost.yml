@@ -1,0 +1,2 @@
+# host_vars/<hostname>.yml
+local_timezone: 'America/Detroit'

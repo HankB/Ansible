@@ -1,0 +1,9 @@
+# group_vars/all.yml
+checkmk_server: oak
+checkmk_server_port: 5000
+checkmk_agent_receiver_port: 8000
+checkmk_site: cmk
+checkmk_agent_cache_dir: "{{ playbook_dir }}/files/checkmk-agent-cache"
+config_system_locale: 'en_US.UTF-8'
+config_system_language: 'en_US.UTF-8'
+local_timezone: 'America/Chicago'

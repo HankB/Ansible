@@ -1,16 +1,20 @@
 ---
 
- - name: Disable Overlay
-   command: >
-     raspi-config nonint disable_overlayfs
-
- - name: reboot following disable_overlayfs
-   reboot:
-
- - name: Disable RO boot
-   command: >
-     raspi-config nonint disable_bootro
-
- - name: reboot following disable_bootro
-   reboot:
+  - name: overlayfs off tasks
+    tags: always
+    block:
+    
+    - name: Disable Overlay
+      command: >
+        raspi-config nonint disable_overlayfs
+    
+    - name: reboot following disable_overlayfs
+      reboot:
+    
+    - name: Disable RO boot
+      command: >
+        raspi-config nonint disable_bootro
+    
+    - name: reboot following disable_bootro
+      reboot:
 

@@ -1,0 +1,134 @@
+---
+# checkmk_agent_update.yml
+#
+# Includable task file that updates the Checkmk Linux agent and the
+# smart_posix plugin. Designed to be dropped into an existing play,
+# INSIDE the window where overlayfs is already disabled (that logic
+# lives in the parent playbooks and is not duplicated here).
+#
+# Usage from a parent playbook:
+#
+#   - name: Update Checkmk agent
+#     include_tasks:
+#       file: checkmk_agent_update.yml
+#       apply:
+#         tags: [checkmk-agent]
+#     tags: [checkmk-agent]
+#     when: checkmk_agent_version is defined
+#
+# Invoke with, e.g.:
+#   ansible-playbook site.yml --tags checkmk-agent -e checkmk_agent_version=2.5.0p9
+#
+# If checkmk_agent_version is left unset, this whole block is a no-op,
+# so it's safe to leave wired into the weekly playbook permanently.
+
+- name: Fail fast if checkmk_agent_version was not provided
+  ansible.builtin.assert:
+    that:
+      - checkmk_agent_version is defined
+      - checkmk_agent_version | length > 0
+    fail_msg: "checkmk_agent_version must be set, e.g. -e checkmk_agent_version=2.5.0p9"
+
+# --- Controller-side cache -------------------------------------------------
+# Runs once per play, delegated to the controller, regardless of which
+# hosts actually need an install this run. get_url is idempotent against
+# the versioned filename, so re-running weekly costs one stat() call
+# once the files are already cached.
+
+- name: Ensure local cache directory exists on controller
+  ansible.builtin.file:
+    path: "{{ checkmk_agent_cache_dir }}"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Download Checkmk agent packages to controller cache
+  ansible.builtin.get_url:
+    url: "http://{{ checkmk_server }}:{{ checkmk_server_port }}/{{ checkmk_site }}/check_mk/agents/check-mk-agent_{{ checkmk_agent_version }}-1_{{ item }}.deb"
+    dest: "{{ checkmk_agent_cache_dir }}/check-mk-agent_{{ checkmk_agent_version }}-1_{{ item }}.deb"
+    mode: "0644"
+  loop:
+    - all
+    - arm64
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Download smart_posix plugin to controller cache
+  ansible.builtin.get_url:
+    url: "http://{{ checkmk_server }}:{{ checkmk_server_port }}/{{ checkmk_site }}/check_mk/agents/plugins/smart_posix"
+    dest: "{{ checkmk_agent_cache_dir }}/smart_posix"
+    mode: "0755"
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+# --- Per-host: figure out what's already installed --------------------------
+
+- name: Check installed Checkmk agent version
+  ansible.builtin.command: dpkg-query -W -f='${Version}' check-mk-agent
+  register: checkmk_agent_installed
+  changed_when: false
+  failed_when: false
+
+- name: Determine whether this host needs the package transferred/installed
+  ansible.builtin.set_fact:
+    checkmk_agent_needs_install: >-
+      {{ checkmk_agent_installed.rc != 0
+         or checkmk_agent_version not in checkmk_agent_installed.stdout }}
+
+- name: Map target architecture to Checkmk package suffix
+  ansible.builtin.set_fact:
+    checkmk_agent_pkg_arch: "{{ 'arm64' if ansible_facts.architecture == 'aarch64' else 'all' }}"
+  # x86_64 and armhf (armv6l/armv7l) both use the 'all' package: on x86_64
+  # its bundled cmk-agent-ctl matches natively; on armhf there is no
+  # compiled agent controller at all, so 'all' is the only option and the
+  # host will run in legacy/insecure pull mode for that piece.
+
+# --- Copy + install (skipped when already current) -------------------------
+
+- name: Copy Checkmk agent package to target
+  ansible.builtin.copy:
+    src: "{{ checkmk_agent_cache_dir }}/check-mk-agent_{{ checkmk_agent_version }}-1_{{ checkmk_agent_pkg_arch }}.deb"
+    dest: "/tmp/check-mk-agent_{{ checkmk_agent_version }}-1_{{ checkmk_agent_pkg_arch }}.deb"
+    mode: "0644"
+  when: checkmk_agent_needs_install
+
+- name: Install Checkmk agent package
+  ansible.builtin.apt:
+    deb: "/tmp/check-mk-agent_{{ checkmk_agent_version }}-1_{{ checkmk_agent_pkg_arch }}.deb"
+  become: true
+  when: checkmk_agent_needs_install
+
+- name: Remove cached .deb from target
+  ansible.builtin.file:
+    path: "/tmp/check-mk-agent_{{ checkmk_agent_version }}-1_{{ checkmk_agent_pkg_arch }}.deb"
+    state: absent
+  when: checkmk_agent_needs_install
+
+# --- SMART plugin ------------------------------------------------------------
+# copy's own checksum comparison already makes this cheap to run every
+# time, so no separate skip-logic is needed here.
+
+- name: Remove legacy smart plugin if present (superseded by smart_posix)
+  ansible.builtin.file:
+    path: /usr/lib/check_mk_agent/plugins/smart
+    state: absent
+  become: true
+
+- name: Deploy smart_posix plugin
+  ansible.builtin.copy:
+    src: "{{ checkmk_agent_cache_dir }}/smart_posix"
+    dest: /usr/lib/check_mk_agent/plugins/smart_posix
+    mode: "0755"
+  become: true
+  register: checkmk_smart_posix_deployed
+
+- name: Note that a re-discovery is needed after smart_posix (re)deployment
+  ansible.builtin.debug:
+    msg: >-
+      smart_posix was installed/updated on {{ inventory_hostname }}.
+      Run service discovery on this host to pick up the new SMART services.
+  when: checkmk_smart_posix_deployed.changed

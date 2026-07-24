@@ -1,25 +1,29 @@
 ---
 
-  - name: verify unattended-upgrades, dphys-swapfile are not installed
-    apt:
-      pkg:
-      - unattended-upgrades
-      - dphys-swapfile
-      state: absent
-
-  - include_tasks: wifi-powersave-off-tasks.yml
-  - include_tasks: trixie_overlayfs_remount_fix.yml
-
-  - name: reboot before enabling overlayfs
-    reboot:
-
-  - name: Enable Overlay
-    command: >
-      raspi-config nonint enable_overlayfs
-
-  - name: Enable RO boot
-    shell: >
-      if (grep boot /etc/fstab | grep -q "defaults.*,ro"); then echo already RO; else raspi-config nonint enable_bootro; fi
-
-  - name: reboot following changes
-    reboot:
+  - name: overlayfs on tasks
+    tags: always
+    block:
+      
+      - name: verify unattended-upgrades, dphys-swapfile are not installed
+        apt:
+          pkg:
+          - unattended-upgrades
+          - dphys-swapfile
+          state: absent
+    
+      - include_tasks: wifi-powersave-off-tasks.yml
+      - include_tasks: trixie_overlayfs_remount_fix.yml
+    
+      - name: reboot before enabling overlayfs
+        reboot:
+    
+      - name: Enable Overlay
+        command: >
+          raspi-config nonint enable_overlayfs
+    
+      - name: Enable RO boot
+        shell: >
+          if (grep boot /etc/fstab | grep -q "defaults.*,ro"); then echo already RO; else raspi-config nonint enable_bootro; fi
+    
+      - name: reboot following changes
+        reboot:

@@ -5,7 +5,17 @@
 
   tasks:
   - include_tasks: overlayfs-off-tasks.yml
+    tags: always
   - include_tasks: apt-upgrade-tasks.yml
- # - include: cleanup-tasks.yml need to sort out where to putr vars
+    tags: always
+  - include_tasks:
+      file: checkmk_agent_update.yml
+      apply:
+        tags: [checkmk-agent]
+    tags: [checkmk-agent]
+    when: checkmk_agent_version is defined
+
+  - include_tasks: cleanup-tasks.yml
+    tags: always
   - include_tasks: overlayfs-on-tasks.yml
     tags: always

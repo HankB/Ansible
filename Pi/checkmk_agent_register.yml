@@ -1,0 +1,99 @@
+---
+# checkmk_agent_register.yml
+#
+# Includable task file that registers this host with the Checkmk site
+# via cmk-agent-ctl, if it isn't already registered. Intended to be run
+# rarely (new hosts, or hosts whose registration needs to be redone),
+# not on every weekly run — hence the tag + explicit trigger var.
+#
+# Requires (in addition to the vars already used by checkmk_agent_update.yml):
+# Requires (in addition to the vars already used by checkmk_agent_update.yml):
+#   checkmk_agent_receiver_port  the Agent Receiver's own port (e.g. 8000) —
+#                                distinct from checkmk_server_port, which is
+#                                the web/Apache port used for downloading
+#                                .deb packages in checkmk_agent_update.yml.
+#   checkmk_automation_user      e.g. "automation"
+#   checkmk_automation_secret    the automation user's secret — MUST come
+#                                from an ansible-vault-encrypted file, never
+#                                plain group_vars.
+#
+# Usage from a parent playbook, right after the agent-update include:
+#
+#   - include_tasks:
+#       file: checkmk_agent_register.yml
+#       apply:
+#         tags: [checkmk-register]
+#     tags: [checkmk-register]
+#     when: checkmk_agent_register | default(false) | bool
+#
+# Invoke with:
+#   ansible-playbook site.yml --tags checkmk-register \
+#       -e checkmk_agent_register=true --ask-vault-pass -l <hosts-to-register>
+#
+# The -l limit is deliberate: you almost always want to register specific
+# new/broken hosts, not re-run this across the whole fleet, even though
+# it's safe to do so (already-registered hosts are skipped).
+
+- name: Fail fast if automation credentials were not provided
+  ansible.builtin.assert:
+    that:
+      - checkmk_automation_user is defined
+      - checkmk_automation_secret is defined
+    fail_msg: >-
+      checkmk_automation_user and checkmk_automation_secret must be set,
+      normally via an ansible-vault-encrypted group_vars file.
+
+- name: Check current cmk-agent-ctl registration status
+  ansible.builtin.command: cmk-agent-ctl status --no-query-remote
+  register: checkmk_status_raw
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Determine whether this host is already registered with the site
+  ansible.builtin.set_fact:
+    checkmk_agent_registered: >-
+      {{ ('Connection: ' ~ checkmk_server ~ '/' ~ checkmk_site) in checkmk_status_raw.stdout }}
+
+- name: Register host with Checkmk site
+  ansible.builtin.command:
+    argv:
+      - cmk-agent-ctl
+      - register
+      - --hostname
+      - "{{ checkmk_host_name | default(inventory_hostname) }}"
+      - --server
+      - "{{ checkmk_server }}:{{ checkmk_agent_receiver_port }}"
+      - --site
+      - "{{ checkmk_site }}"
+      - --user
+      - "{{ checkmk_automation_user }}"
+      - --password
+      - "{{ checkmk_automation_secret }}"
+      - --trust-cert
+  become: true
+  no_log: false
+  when: not checkmk_agent_registered
+  register: checkmk_register_result
+  failed_when: checkmk_register_result.rc != 0
+
+- name: Confirm registration succeeded
+  ansible.builtin.command: cmk-agent-ctl status --no-query-remote
+  register: checkmk_status_after
+  changed_when: false
+  become: true
+  when: not checkmk_agent_registered
+
+- name: Report registration outcome
+  ansible.builtin.debug:
+    msg: >-
+      {{ inventory_hostname }} was already registered with {{ checkmk_server }}/{{ checkmk_site }}.
+  when: checkmk_agent_registered
+
+- name: Report fresh registration and reminder to run discovery
+  ansible.builtin.debug:
+    msg: >-
+      {{ inventory_hostname }} registered with {{ checkmk_server }}/{{ checkmk_site }}.
+      Remember to run service discovery on this host in the Checkmk UI
+      (or via the REST API/cmk command) to pick up any TLS-dependent changes.
+  when: not checkmk_agent_registered
