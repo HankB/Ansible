@@ -77,7 +77,7 @@ In particular, the user will want to inspect `group_vars/all/vars.yml` and edit 
 
 ```text
 # typical update:
-ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K --ask-vault-pass
+ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K 
 # update and upgrade Checkmk agent and register host:
 ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K \
     --tags checkmk-agent,checkmk-register \
@@ -85,8 +85,8 @@ ansible-playbook apt-upgrade.yml -i inventory -l misc_n -b -K \
     -e checkmk_agent_register=true \
     --ask-vault-pass
 
-# typical update
-ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l iot_n -b -K --ask-vault-pass
+# typical update, hosts that employ overlayfs
+ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l iot_n -b -K
 # update and iupgrade Checkmk agent (It is only applied to Pi Zeros for which support
 # is not provided to register the host so that task is not included)
 ansible-playbook apt-upgrade-overlayfs.yml -i inventory -l iot_n -b -K \

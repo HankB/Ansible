@@ -34,6 +34,10 @@
 # new/broken hosts, not re-run this across the whole fleet, even though
 # it's safe to do so (already-registered hosts are skipped).
 
+- name: Load checkmk automation credentials from vault
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/vars/checkmk_vault.yml"
+
 - name: Fail fast if automation credentials were not provided
   ansible.builtin.assert:
     that:
