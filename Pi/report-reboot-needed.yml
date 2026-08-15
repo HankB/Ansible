@@ -3,6 +3,21 @@
 
   tasks:
 
+  - name: update
+    apt:
+      cache_valid_time: 3600
+      upgrade: no
+    register: update_result
+    retries: 5
+    become: yes
+    until: update_result is success
+
+  - name: install package that sets /var/run/reboot-required
+    apt:
+      pkg:
+      - reboot-notifier
+    become: yes
+      
   - name: Check if a reboot is required
     ansible.builtin.stat:
       path: /var/run/reboot-required
