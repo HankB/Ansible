@@ -1,0 +1,15 @@
+  - name: install package that sets /var/run/reboot-required
+    apt:
+      pkg:
+      - reboot-notifier
+    become: yes
+      
+  - name: Check if a reboot is required
+    ansible.builtin.stat:
+      path: /var/run/reboot-required
+    register: reboot_file_status
+  
+  - name: Report if reboot is needed
+    ansible.builtin.debug:
+      msg: "A system reboot is required on this Debian host."
+    when: reboot_file_status.stat.exists

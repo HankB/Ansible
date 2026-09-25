@@ -23,3 +23,6 @@
 
   - include_tasks: cleanup-tasks.yml
     tags: always
+
+  - include_tasks: report-reboot-needed-tasks.yml
+    tags: always    
